@@ -14,8 +14,8 @@ def parse_proj4_string(proj4str, parse_type="default"):
     Returns
     -------
     out : dict
-      Dictionary, where keys and values are the names and value of the projection 
-      parameters beginning with '+'.
+      Dictionary, where keys and values are parsed from the projection parameter 
+      tokens beginning with '+'.
     """
     if parse_type not in ["default", "basemap"]:
         raise ValueError("invalid parse type: must be 'default' or 'basemap'")
