@@ -5,7 +5,7 @@ import matplotlib.colors as colors
 
 import numpy as np
 
-def plot_precip_field(R, units='mmhr', colorscale='MeteoSwiss', colorbar=True):
+def plot_precip_field(R, units='mmhr', colorscale='MeteoSwiss', extent=None, title=None, colorbar=True):
     """Function to plot a precipitation field witha a colorbar. 
     
     Parameters 
@@ -17,6 +17,8 @@ def plot_precip_field(R, units='mmhr', colorscale='MeteoSwiss', colorbar=True):
         Units of the input array (mmhr or dBZ)
     colorscale : str 
         Which colorscale to use (MeteoSwiss, STEPS-BE)
+    extent: list
+        Image extent [xmin,xmax,ymin,ymax].
     colorbar : bool 
         Whether to add the colorbar or not. 
     
@@ -32,14 +34,15 @@ def plot_precip_field(R, units='mmhr', colorscale='MeteoSwiss', colorbar=True):
     # Plot radar domain mask
     mask = np.ones(R.shape)
     mask[~np.isnan(R)] = np.nan # Fully transparent within the radar domain
-    plt.imshow(mask, cmap=colors.ListedColormap(['gray']))
+    plt.imshow(mask, cmap=colors.ListedColormap(['gray']), extent=extent)
     
     # Plot precipitation field
     if units == 'mmhr':
         R[R < 0.1] = np.nan # Transparent where no precipitation
     if units == 'dBZ':
         R[R < 10] = np.nan
-    im = plt.imshow(R, cmap=cmap, norm=norm, interpolation='nearest')
+    im = plt.imshow(R, cmap=cmap, norm=norm, extent=extent, interpolation='nearest')
+    plt.title(title)
     
     axes = plt.gca()
     # Add colorbar
@@ -48,7 +51,7 @@ def plot_precip_field(R, units='mmhr', colorscale='MeteoSwiss', colorbar=True):
         cbar.ax.set_yticklabels(clevsStr)
         cbar.ax.set_title(units, fontsize=12)
     
-    return(axes)
+    return axes
     
 def get_colormap(units='mmhr', colorscale='MeteoSwiss'):
     ''' Function to generate a colormap (cmap) and norm
@@ -83,7 +86,7 @@ def get_colormap(units='mmhr', colorscale='MeteoSwiss'):
         cmap.set_over('black',1)
     norm = colors.BoundaryNorm(clevs, cmap.N)    
     
-    return(cmap, norm, clevs, clevsStr)
+    return cmap, norm, clevs, clevsStr
     
 def _get_colorlist(units='mmhr', colorscale='MeteoSwiss'):
     """Function to get a list of colors to generate the colormap. 
@@ -134,7 +137,7 @@ def _get_colorlist(units='mmhr', colorscale='MeteoSwiss'):
     clevsStr = []
     clevsStr = _dynamic_formatting_floats(clevs, )
     
-    return(color_list, clevs, clevsStr)
+    return color_list, clevs, clevsStr
 
 def _dynamic_formatting_floats(floatArray, colorscale='MeteoSwiss'):
     ''' Function to format the floats defining the class limits of the colorbar.
