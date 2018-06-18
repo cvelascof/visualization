@@ -28,23 +28,29 @@ def plot_precip_field(R, geodata, units='mmhr', colorscale='MeteoSwiss', title=N
         Figure axes. Needed if one wants to add e.g. text inside the plot.
     
     """
+    
+    if len(R.shape) != 2:
+        raise ValueError("the input is not two-dimensional array")
+    
+    Rplot = R.copy()    
+    
     # Get colormap and color levels
     cmap, norm, clevs, clevsStr = get_colormap(units, colorscale)
     
+    # Extract extent for imshow function
+    extent = np.array([geodata['x1'],geodata['x2'],geodata['y1'],geodata['y2']])/1000
+    
     # Plot radar domain mask
-    mask = np.ones(R.shape)
-    mask[~np.isnan(R)] = np.nan # Fully transparent within the radar domain
-    plt.imshow(mask, cmap=colors.ListedColormap(['gray']), 
-               extent=(geodata['x1'],geodata['x2'],geodata['y1'],geodata['y2'])/1000)
+    mask = np.ones(Rplot.shape)
+    mask[~np.isnan(Rplot)] = np.nan # Fully transparent within the radar domain
+    plt.imshow(mask, cmap=colors.ListedColormap(['gray']), extent=extent)
     
     # Plot precipitation field
     if units == 'mmhr':
-        R[R < 0.1] = np.nan # Transparent where no precipitation
+        Rplot[Rplot < 0.1] = np.nan # Transparent where no precipitation
     if units == 'dBZ':
-        R[R < 10] = np.nan
-    im = plt.imshow(R, cmap=cmap, norm=norm, 
-                    extent=(geodata['x1'],geodata['x2'],geodata['y1'],geodata['y2'])/1000, 
-                    interpolation='nearest')
+        Rplot[Rplot < 10] = np.nan
+    im = plt.imshow(Rplot, cmap=cmap, norm=norm, extent=extent, interpolation='nearest')
     plt.title(title)
     
     axes = plt.gca()
