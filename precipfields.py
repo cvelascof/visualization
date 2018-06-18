@@ -5,20 +5,20 @@ import matplotlib.colors as colors
 
 import numpy as np
 
-def plot_precip_field(R, units='mmhr', colorscale='MeteoSwiss', extent=None, title=None, colorbar=True):
+def plot_precip_field(R, geodata, units='mmhr', colorscale='MeteoSwiss', title=None, 
+                      colorbar=True):
     """Function to plot a precipitation field witha a colorbar. 
     
     Parameters 
     ---------- 
     R : array-like 
         Array of shape (m,n) containing the input precipitation field.
-    
+    geodata : dictionary
+        Dictionary containing geographical information about the field.
     units : str
         Units of the input array (mmhr or dBZ)
     colorscale : str 
         Which colorscale to use (MeteoSwiss, STEPS-BE)
-    extent: list
-        Image extent [xmin,xmax,ymin,ymax].
     colorbar : bool 
         Whether to add the colorbar or not. 
     
@@ -34,14 +34,17 @@ def plot_precip_field(R, units='mmhr', colorscale='MeteoSwiss', extent=None, tit
     # Plot radar domain mask
     mask = np.ones(R.shape)
     mask[~np.isnan(R)] = np.nan # Fully transparent within the radar domain
-    plt.imshow(mask, cmap=colors.ListedColormap(['gray']), extent=extent)
+    plt.imshow(mask, cmap=colors.ListedColormap(['gray']), 
+               extent=(geodata['x1'],geodata['x2'],geodata['y1'],geodata['y2'])/1000)
     
     # Plot precipitation field
     if units == 'mmhr':
         R[R < 0.1] = np.nan # Transparent where no precipitation
     if units == 'dBZ':
         R[R < 10] = np.nan
-    im = plt.imshow(R, cmap=cmap, norm=norm, extent=extent, interpolation='nearest')
+    im = plt.imshow(R, cmap=cmap, norm=norm, 
+                    extent=(geodata['x1'],geodata['x2'],geodata['y1'],geodata['y2'])/1000, 
+                    interpolation='nearest')
     plt.title(title)
     
     axes = plt.gca()
