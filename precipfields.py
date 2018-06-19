@@ -5,7 +5,7 @@ import matplotlib.colors as colors
 
 import numpy as np
 
-def plot_precip_field(R, geodata, units='mmhr', colorscale='MeteoSwiss', title=None, 
+def plot_precip_field(R, geodata=None, units='mmhr', colorscale='MeteoSwiss', title=None, 
                       colorbar=True):
     """Function to plot a precipitation field witha a colorbar. 
     
@@ -38,8 +38,11 @@ def plot_precip_field(R, geodata, units='mmhr', colorscale='MeteoSwiss', title=N
     cmap, norm, clevs, clevsStr = get_colormap(units, colorscale)
     
     # Extract extent for imshow function
-    extent = np.array([geodata['x1'],geodata['x2'],geodata['y1'],geodata['y2']])/1000
-    
+    if geodata is not None:
+        extent = np.array([geodata['x1'],geodata['x2'],geodata['y1'],geodata['y2']])/1000
+    else:
+        extent = np.array([0, R.shape[1], 0, R.shape[0]])
+        
     # Plot radar domain mask
     mask = np.ones(Rplot.shape)
     mask[~np.isnan(Rplot)] = np.nan # Fully transparent within the radar domain
@@ -59,6 +62,10 @@ def plot_precip_field(R, geodata, units='mmhr', colorscale='MeteoSwiss', title=N
         cbar = plt.colorbar(im, ticks=clevs, spacing='uniform', norm=norm, extend='max')
         cbar.ax.set_yticklabels(clevsStr)
         cbar.ax.set_title(units, fontsize=12)
+        
+    if geodata is None:
+        axes.xaxis.set_ticklabels([])
+        axes.yaxis.set_ticklabels([])
     
     return axes
     
